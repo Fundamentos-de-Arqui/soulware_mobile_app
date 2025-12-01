@@ -8,10 +8,10 @@ class AuthApi {
 
   String baseUrl = dotenv.env['API_URL'] ?? "http://10.0.2.2:3000/api";
 
-  late final authApiUrl = Uri.parse("$baseUrl/auth");
+  late final url = Uri.parse("$baseUrl/login");
   
   Future<Map<String, dynamic>> login(String dni, String password) async {
-    final url = Uri.parse("$authApiUrl/login");
+   
 
     final response = await http.post(
       url,

@@ -21,7 +21,7 @@ class LoginController extends Notifier<LoginState> {
 
     try {
       final tokens = await loginUser(dni, password);
-      await session.saveTokens(tokens.token, tokens.accountType);
+      await session.saveTokens(tokens.token, tokens.accountType, tokens.profileId);
       state = state.copyWith(loading: false, tokens: tokens);
     } catch (e) {
       state = state.copyWith(loading: false, error: e.toString());

@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:soulware_app/core/services/session_provider.dart';
 import 'package:soulware_app/features/auth/presentation/login/login_page.dart';
-import 'package:soulware_app/features/home/presentation/home_page.dart';
+import 'package:soulware_app/features/sessions/presentation/sessions_page.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -23,6 +23,14 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       if (logged && (isLogin)) {
         return '/login';
+      }
+
+      if (role == "LEGAL_RESPONSIBLE" && state.matchedLocation == '/home') {
+        return '/legal';
+      }
+
+      if (role == "THERAPIST" && state.matchedLocation == '/home') {
+        return '/therapist';
       }
 
       // Legal Responsable no puede acceder a rutas de Therapist
@@ -70,14 +78,6 @@ final routerProvider = Provider<GoRouter>((ref) {
                 if (role == null) {
                   return SizedBox(height: 65); 
                 }
-
-                items.add(
-                  _NavItem(
-                    label: "Home",
-                    icon: Icons.home,
-                    location: "/home",
-                  ),
-                );
 
                 if (role == "THERAPIST") {
                   items.add(
@@ -154,12 +154,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/therapist',
-            builder: (_, __) => const PlaceholderWidget("Therapist"),
-          ),
-          GoRoute(
-            path: '/home',
-            builder: (_, __) => const HomePage(),
-          ),
+            builder: (_, __) => const SessionsPage(),
+          )
         ],
 
         // ---------- RUTAS HIJAS DE SHELLROUTE ---------
