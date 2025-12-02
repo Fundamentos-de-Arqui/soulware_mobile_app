@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:soulware_app/core/services/session_provider.dart';
 import 'package:soulware_app/features/sessions/domain/models/session_model.dart';
 import 'package:soulware_app/features/sessions/presentation/sessions_controller.dart';
 
@@ -12,17 +13,20 @@ class SessionsPage extends ConsumerStatefulWidget {
 }
 
 class _SessionsPageState extends ConsumerState<SessionsPage> {
-
   @override
   void initState() {
     super.initState();
 
-    // Cargar sesiones apenas se entra a la pantalla
-    Future.microtask(() {
-      ref.read(sessionsControllerProvider.notifier).loadSessions(
-        page: 0,
-        size: 20,
-      );
+    Future.microtask(() async {
+      final session = ref.read(sessionServiceProvider);
+      final token = await session.getAccessToken();
+      final profileId = await session.getProfileId();
+
+      if (token != null && profileId != null) {
+        ref
+            .read(sessionsControllerProvider.notifier)
+            .loadSessions(page: 0, size: 20, therapistId: profileId.toString());
+      }
     });
   }
 
@@ -35,11 +39,9 @@ class _SessionsPageState extends ConsumerState<SessionsPage> {
       appBar: AppBar(title: const Text("Sesiones")),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          ref.read(sessionsControllerProvider.notifier).loadSessions(
-                page: 0,
-                size: 20,
-                
-              );
+          ref
+              .read(sessionsControllerProvider.notifier)
+              .loadSessions(page: 0, size: 20);
         },
         child: const Icon(Icons.refresh),
       ),
@@ -54,7 +56,7 @@ class _SessionsPageState extends ConsumerState<SessionsPage> {
               child: ListView.builder(
                 itemCount: state.sessions.length,
                 itemBuilder: (_, i) =>
-                    _ScheduleCard(model: state.sessions[i]),
+                    _ScheduleCard(model: state.sessions[i], ref: ref),
               ),
             ),
           ],
@@ -63,14 +65,16 @@ class _SessionsPageState extends ConsumerState<SessionsPage> {
     );
   }
 }
+
 //
 // ======================= CARD ADAPTADA =======================
 //
 
 class _ScheduleCard extends StatelessWidget {
   final SessionModel model;
+  final WidgetRef ref;
 
-  const _ScheduleCard({required this.model});
+  const _ScheduleCard({required this.model, required this.ref});
 
   Color _getStatusColor(String status) {
     switch (status) {
@@ -93,6 +97,32 @@ class _ScheduleCard extends StatelessWidget {
     } catch (_) {
       return null;
     }
+  }
+
+  void _confirmStatusChange(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text("Confirmar"),
+        content: const Text("¿Marcar esta sesión como DONE?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text("Cancelar"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop(); // SEGURO
+
+              final controller = ref.read(sessionsControllerProvider.notifier);
+
+              controller.updateStatus(model.id);
+            },
+            child: const Text("Confirmar"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -119,7 +149,7 @@ class _ScheduleCard extends StatelessWidget {
             color: Colors.black12.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -170,8 +200,7 @@ class _ScheduleCard extends StatelessWidget {
           Align(
             alignment: Alignment.centerRight,
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
               decoration: BoxDecoration(
                 color: _getStatusColor(model.status).withOpacity(0.15),
                 borderRadius: BorderRadius.circular(12),
@@ -185,6 +214,18 @@ class _ScheduleCard extends StatelessWidget {
               ),
             ),
           ),
+
+          const SizedBox(height: 8),
+
+          if (model.status == "SCHEDULED")
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: () => _confirmStatusChange(context),
+                icon: const Icon(Icons.check),
+                label: const Text("Marcar como DONE"),
+              ),
+            ),
         ],
       ),
     );
@@ -197,10 +238,7 @@ class _ScheduleCard extends StatelessWidget {
         children: [
           Text(
             "$label: ",
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 15,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
           ),
           Expanded(
             child: Text(
@@ -208,7 +246,7 @@ class _ScheduleCard extends StatelessWidget {
               style: const TextStyle(fontSize: 15),
               overflow: TextOverflow.ellipsis,
             ),
-          )
+          ),
         ],
       ),
     );

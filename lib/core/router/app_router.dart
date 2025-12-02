@@ -89,6 +89,16 @@ final routerProvider = Provider<GoRouter>((ref) {
                   );
                 }
 
+                if (role == "THERAPIST") {
+                  items.add(
+                    _NavItem(
+                      label: "evaluation",
+                      icon: Icons.healing,
+                      location: "/evaluation",
+                    ),
+                  );
+                }
+
                 if (role == "LEGAL_RESPONSIBLE") {
                   items.add(
                     _NavItem(
@@ -155,7 +165,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/therapist',
             builder: (_, __) => const SessionsPage(),
-          )
+          ),
+          GoRoute(
+            path: '/evaluation',
+            builder: (_, __) => const PlaceholderWidget("Evaluation"),
+          ),
         ],
 
         // ---------- RUTAS HIJAS DE SHELLROUTE ---------

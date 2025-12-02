@@ -37,4 +37,10 @@ class SessionsRepository {
         .map((item) => SessionModel.fromJson(item))
         .toList();
   }
+
+  Future<void> updateSessionStatus(int id, String status) async {
+    return api.updateSessionStatus(id, status);
+  }
+
+
 }
