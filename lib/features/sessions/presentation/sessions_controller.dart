@@ -24,7 +24,7 @@ class SessionsController extends Notifier<SessionsState> {
       final result = await fetchSessions(
         page: page,
         size: size,
-        therapistId: 6.toString(),
+        therapistId: therapistId,
         patientId: patientId,
         legalResponsibleId: legalResponsibleId,
       );

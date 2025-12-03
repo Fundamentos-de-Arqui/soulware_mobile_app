@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'package:soulware_app/core/services/session_provider.dart';
 import 'package:soulware_app/features/auth/presentation/login/login_page.dart';
+import 'package:soulware_app/features/sessions/presentation/sessions_legal_page.dart';
 import 'package:soulware_app/features/sessions/presentation/sessions_page.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -89,16 +90,6 @@ final routerProvider = Provider<GoRouter>((ref) {
                   );
                 }
 
-                if (role == "THERAPIST") {
-                  items.add(
-                    _NavItem(
-                      label: "evaluation",
-                      icon: Icons.healing,
-                      location: "/evaluation",
-                    ),
-                  );
-                }
-
                 if (role == "LEGAL_RESPONSIBLE") {
                   items.add(
                     _NavItem(
@@ -160,16 +151,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: '/legal',
-            builder: (_, __) => const PlaceholderWidget("Legal"),
+            builder: (_, __) => const SessionsLegalPage(),
           ),
           GoRoute(
             path: '/therapist',
             builder: (_, __) => const SessionsPage(),
           ),
-          GoRoute(
-            path: '/evaluation',
-            builder: (_, __) => const PlaceholderWidget("Evaluation"),
-          ),
+          
         ],
 
         // ---------- RUTAS HIJAS DE SHELLROUTE ---------
